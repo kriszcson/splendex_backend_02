@@ -1,9 +1,13 @@
 const express = require('express');
-
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    res.json({ baybe: "BAYBEYODA" });
-});
+const accounts = require('../../src/startingdata/accountsData');
+
+
+router.get('/', (req, res) => {});
+
+router.post('/', (req, res) => {});
+
+
 
 module.exports = router;
