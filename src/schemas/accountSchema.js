@@ -1,26 +1,12 @@
-const express = require('express');
-const app = express();
-const accountRoutes = require('../api/routes/accounts');
-const transactionRoutes = require('../api/routes/transactions');
+const mongoose = require('mongoose');
 
-//middleware
-app.use('/accounts', accountRoutes);
-app.use('/transactions', transactionRoutes);
-
-app.get('/', (req, res) => {
-    res.json({ message: "Welcome to my Bank API!" })
-})
-app.use((req, res, next) => {
-    const error = new Error('Not found!');
-    error.status(404);
-    next(error);
+const accountSchema = new mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    account_holder_name: { type: String, required: true },
+    account_number: { type: Number, required: true },
+    starting_balance: { type: Number, required: true },
+    created_on: { type: Date, required: true },
+    expires_in: { type: Date, required: true }
 })
 
-app.use((err, req, res, next) => {
-    res.status(err.status || 500);
-    res.json({
-        error: { message: err.message }
-    })
-})
-
-module.exports = app;
+module.exports = mongoose.model('Account', accountSchema);
