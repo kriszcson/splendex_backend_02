@@ -6,10 +6,27 @@ const Account = require('../../src/schemas/accountSchema.js');
 
 router.get('/', (req, res) => {
     Account.find()
+        .select('account_holder_name account_number starting_balance created_on expires_in')
         .exec()
         .then((docs => {
-            console.log(docs);
-            res.status(201).json(docs);
+            const response = {
+                count: docs.length,
+                account: docs.map(doc => {
+                    return {
+                        _id: doc._id,
+                        account_holder_name: doc.account_holder_name,
+                        account_number: doc.account_number,
+                        starting_balance: doc.starting_balance,
+                        created_on: doc.created_on,
+                        expires_in: doc.expires_in,
+                        request: {
+                            type: 'GET',
+                            url: `http://localhost:3000/accounts/${doc._id}`
+                        }
+                    }
+                })
+            }
+            res.status(201).json(response);
         }))
         .catch(err => {
             console.log(err);
@@ -33,7 +50,7 @@ router.post('/', (req, res) => {
         .then(result => {
             console.log(result);
             res.status(201).json({
-                message: "Handling POST requests to /accounts",
+                message: "Account succesfully created!",
                 createdAccount: result
             });
         })
@@ -48,6 +65,7 @@ router.post('/', (req, res) => {
 router.get('/:id', (req, res, next) => {
     const id = req.params.id;
     Account.findById(id)
+        .select('account_holder_name account_number starting_balance created_on expires_in')
         .exec()
         .then(doc => {
             console.log("FROM DATABASE:" + doc);

@@ -9,6 +9,7 @@ const connectionString = require('../config');
 
 
 mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.Promise = global.Promise;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
