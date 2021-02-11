@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 
 const accountRoutes = require('../api/routes/accounts');
 const transactionRoutes = require('../api/routes/transactions');
+const incomeReports = require('../api/routes/reports/income');
+const expenseReports = require('../api/routes/reports/expense');
+
 const connectionString = require('../config');
 
 
@@ -29,10 +32,14 @@ app.use((req, res, next) => {
 
 app.use('/accounts', accountRoutes);
 app.use('/transactions', transactionRoutes);
+app.use('/reports/income', incomeReports);
+app.use('/reports/expense', expenseReports);
+
 
 app.get('/', (req, res) => {
     res.json({ message: "Welcome to my Bank API!" })
 })
+
 app.use((req, res, next) => {
     const error = new Error('Not found!');
     error.status = 404;
