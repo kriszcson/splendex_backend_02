@@ -68,7 +68,6 @@ router.get('/:id', (req, res, next) => {
         .select('account_holder_name account_number starting_balance created_on expires_in')
         .exec()
         .then(doc => {
-            console.log("FROM DATABASE:" + doc);
             if (doc) {
                 res.status(200).json(doc);
             } else {
@@ -92,7 +91,6 @@ router.patch('/:id', (req, res, next) => {
         })
         .exec()
         .then(result => {
-            console.log(result);
             res.status(200).json({ result });
         })
         .catch(err => {
