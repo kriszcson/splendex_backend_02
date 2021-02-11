@@ -43,13 +43,18 @@ router.post('/', (req, res) => {
     let accountOfTransaction;
     Account.findById(req.body.account)
         .then(account => {
+            accountOfTransaction = account;
             if (!account) {
                 return res.status(404).json({
                     message: "Account not find!"
                 })
             }
+            if ((account.starting_balance + req.body.transaction_amount < 0) && req.body.transaction_amount < 0) {
+                return res.status(500).json({
+                    message: "Not enough coverage on the account!"
+                })
+            }
             accountBalancing(account, req.body.transaction_amount);
-            accountOfTransaction = account;
             const transaction = new Transaction({
                 _id: mongoose.Types.ObjectId(),
                 account: req.body.account, //account _id
@@ -63,11 +68,18 @@ router.post('/', (req, res) => {
                 .save()
         })
         .then(result => {
-            res.status(201).json({
-                transaction: result,
-                account_balance_before: accountOfTransaction.starting_balance - req.body.transaction_amount,
-                account_balance_after: (accountOfTransaction.starting_balance)
-            });
+            if (result._id) {
+                res.status(201).json({
+                    message: "The transaction is successful!",
+                    transaction: result,
+                    account: {
+                        account_holder_name: accountOfTransaction.account_holder_name,
+                        account_number: accountOfTransaction.account_number,
+                        account_balance_before: accountOfTransaction.starting_balance - req.body.transaction_amount,
+                        account_balance_after: accountOfTransaction.starting_balance
+                    }
+                });
+            }
         })
         .catch(err => {
             console.log(err);
@@ -77,14 +89,10 @@ router.post('/', (req, res) => {
 
 function accountBalancing(account, amount) {
     const id = account._id;
-    const updateOps = {};
     Account.updateOne({ _id: id }, {
             starting_balance: account.starting_balance += amount
         })
         .exec()
-        .then(result => {
-            res.status(200).json({ result });
-        })
         .catch(err => {
             console.log(err);
             res.status(500).json({
@@ -94,5 +102,3 @@ function accountBalancing(account, amount) {
 }
 
 module.exports = router;
-
-//60250b7398d38d1d60afacb9
