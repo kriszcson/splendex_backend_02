@@ -34,7 +34,7 @@ router.get('/:id/:from?/:to?', (req, res, next) => {
                     }
                 }
             }
-            res.status(201).json({
+            res.status(200).json({
                 count: responseInPeriod.length,
                 all_expense: expenseInPeriod,
                 expenses: responseInPeriod

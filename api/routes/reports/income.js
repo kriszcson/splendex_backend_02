@@ -2,27 +2,47 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
+const Transaction = require('../../../src/schemas/transactionSchema.js');
 
-router.get('/:id/:from/:to', (req, res, next) => {
+router.get('/:id/:from?/:to?', (req, res, next) => {
     const id = req.params.id;
-    const dateFrom = req.params.from;
-    const dateTo = req.params.to;
-
-    Account.findById(id)
-        .select('account_holder_name account_number starting_balance created_on expires_in')
+    const dateFrom = new Date(req.params.from);
+    const dateTo = new Date(req.params.to);
+    Transaction.find({ account: id })
         .exec()
-        .then(doc => {
-            if (doc) {
-                console.log(doc);
-            } else {
-                res.status(404).json({ message: "No valid entry found for provided ID" });
+        .then(docs => {
+            if ((!req.params.from || !req.params.to) && !(!req.params.from && !req.params.to)) {
+                return res.status(500).json({
+                    message: "The start, or the end of the period is missing!"
+                })
             }
+            let responseInPeriod = [];
+            let expenseInPeriod = 0;
+            for (let doc of docs) {
+                if (doc.transaction_type === 'bevétel') {
+                    //üres time-routok esetében az összes kiadás
+                    if (!req.params.from && !req.params.to) {
+                        responseInPeriod.push(doc);
+                        expenseInPeriod += doc.transaction_amount;
+                    } else {
+                        if (dateFrom.getTime() < doc.finished_on.getTime() &&
+                            doc.finished_on.getTime() < dateTo.getTime()) {
+                            responseInPeriod.push(doc);
+                            expenseInPeriod += doc.transaction_amount;
+                        }
+                    }
+                }
+            }
+            res.status(200).json({
+                count: responseInPeriod.length,
+                all_expense: expenseInPeriod,
+                expenses: responseInPeriod
+            });
         })
         .catch(err => {
             console.log(err);
             res.status(500).json({ error: err })
         });
 })
-
 
 module.exports = router;
