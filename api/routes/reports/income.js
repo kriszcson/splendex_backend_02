@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
 
 const Transaction = require('../../../src/schemas/transactionSchema.js');
 
@@ -44,5 +43,10 @@ router.get('/:id/:from?/:to?', (req, res, next) => {
             res.status(500).json({ error: err })
         });
 })
+router.get('/', (req, res, next) => {
+    res.status(500).json({
+        message: "Please add an account ID!"
+    })
+});
 
 module.exports = router;
